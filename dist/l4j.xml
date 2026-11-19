@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <headerType>gui</headerType>
+  <jar>PCLGE2.jar</jar>
+  <dontWrapJar>false</dontWrapJar>
+  <outfile>PCLGE2.exe</outfile>
+  <errTitle>PCLGE2 启动失败</errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <classPath>
+    <mainClass>pclge2.Main</mainClass>
+    <cp>PCLGE2.jar</cp>
+    <cp>lib/gson-2.11.0.jar</cp>
+  </classPath>
+  <jre>
+    <path>jre</path>
+    <requiresJdk>false</requiresJdk>
+    <requires64Bit>true</requires64Bit>
+    <minVersion>17</minVersion>
+    <options>
+      <opt>--module-path</opt>
+      <opt>lib</opt>
+      <opt>--add-modules</opt>
+      <opt>javafx.controls</opt>
+    </options>
+  </jre>
+  <versionInfo>
+    <fileVersion>2.0.0.0</fileVersion>
+    <txtFileVersion>2.00</txtFileVersion>
+    <fileDescription>PCLGE2 Minecraft Launcher (Java 17)</fileDescription>
+    <copyright>PCLGE2</copyright>
+    <productVersion>2.0.0.0</productVersion>
+    <txtProductVersion>2.00</txtProductVersion>
+    <productName>PCLGE2</productName>
+    <internalName>PCLGE2</internalName>
+    <originalFilename>PCLGE2.exe</originalFilename>
+  </versionInfo>
+</launch4jConfig>

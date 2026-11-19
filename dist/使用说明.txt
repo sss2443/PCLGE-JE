@@ -1,0 +1,7 @@
+PCLGE2 2.00（Java 17 + JavaFX 17 版）
+=================================
+Windows：直接双击 PCLGE2.exe（已内置 JRE 17，无需另装 Java）。
+若双击无反应：运行 PCLGE2.bat，看窗口里的报错。
+数据目录：%APPDATA%\PCLGE2（配置 pclge2-config.properties、皮肤、日志）。
+游戏目录默认：%APPDATA%\PCLGE2\.minecraft，可在「设置 → 启动器」修改。
+功能：启动 / 基岩版 / 下载（游戏版本、整合包、模组、资源包）/ 设置 / 工具（皮肤、成就图、日志）/ 联机。
