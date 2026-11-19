@@ -1,0 +1,6 @@
+out/
+outcore/
+dist/jre/
+dist/lib/*.jar
+*.zip
+screenshots/*.png
