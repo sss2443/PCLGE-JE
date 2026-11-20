@@ -1,0 +1,87 @@
+/* PCLGE2 皮肤：取 PCLCE 官方配色与控件样式 */
+.root {
+    -fx-font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-text-fill: #343d4a;
+}
+
+/* 普通按钮：白底 + 浅蓝描边，悬停变主题蓝（对应 MyButton） */
+.button {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #343d4a;
+    -fx-border-color: #d5e6fd;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 5 12 5 12;
+    -fx-cursor: hand;
+}
+.button:hover {
+    -fx-border-color: #1370f3;
+    -fx-text-fill: #1370f3;
+}
+.button:pressed {
+    -fx-background-color: #eaf2fe;
+}
+
+/* 列表：透明底 + 淡蓝悬停 + ColorBrush7 选中（对应 MyListItem） */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #343d4a;
+    -fx-padding: 8 10 8 10;
+    -fx-background-radius: 4;
+}
+.list-cell:filled:hover {
+    -fx-background-color: rgba(19, 112, 243, 0.08);
+}
+.list-cell:filled:selected {
+    -fx-background-color: #e0eafd;
+    -fx-text-fill: #0b5bcb;
+}
+
+/* 输入框 / 下拉框 */
+.text-field, .text-area, .combo-box, .spinner {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d5e6fd;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+.text-field:focused, .text-area:focused, .combo-box:focused {
+    -fx-border-color: #1370f3;
+}
+.combo-box .list-cell {
+    -fx-padding: 4 8 4 8;
+}
+
+/* 选项卡 */
+.tab-pane .tab {
+    -fx-background-color: transparent;
+}
+.tab-pane .tab:selected {
+    -fx-background-color: #eaf2fe;
+}
+.tab-pane .tab-label {
+    -fx-text-fill: #343d4a;
+}
+
+/* 进度条 */
+.progress-bar .bar {
+    -fx-background-color: #1370f3;
+}
+.progress-bar .track {
+    -fx-background-color: #e0eafd;
+}
+
+/* 分隔线 / 滚动条 */
+.separator .line {
+    -fx-border-color: #e0eafd;
+}
+.scroll-bar .thumb {
+    -fx-background-color: #d5e6fd;
+    -fx-background-radius: 4;
+}

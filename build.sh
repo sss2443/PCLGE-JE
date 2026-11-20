@@ -14,6 +14,11 @@ find "$DIR/src/main/java" -name "*.java" > "$DIR/sources.txt"
   -cp "$DIR/lib/gson-2.11.0.jar" \
   -d "$DIR/out" @"$DIR/sources.txt"
 
+echo "== 1.5 复制资源 =="
+if [ -d "$DIR/src/main/resources" ]; then
+  cp -R "$DIR/src/main/resources/." "$DIR/out/"
+fi
+
 echo "== 2. 打包 jar =="
 "$JAVA_HOME/bin/jar" --create --file "$DIR/PCLGE2.jar" \
   --main-class pclge2.Main -C "$DIR/out" .

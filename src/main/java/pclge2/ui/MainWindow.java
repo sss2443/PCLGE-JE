@@ -26,13 +26,18 @@ import java.util.List;
  * PCLGE2 主窗口（JavaFX）—— 结构对齐原版 PCL / PCLCE：
  * 顶部一级导航：启动 / 基岩版 / 下载 / 设置 / 工具 / 联机；
  * 每个一级页内部是「左侧子页列表 + 右侧内容」双栏；底部常驻日志面板。
+ * 视觉皮肤取 PCLCE 官方配色与控件样式（Application.xaml / MyButton / MyRadioButton / MyListItem）。
  */
 public final class MainWindow {
 
-    private static final String BG = "#f5f7fa";
+    // PCLCE 官方配色（取自 Application.xaml 的 ColorBrush 表）
+    private static final String BG = "#eaf2fe";          // ColorBrush8
     private static final String CARD = "#ffffff";
-    private static final String PRIMARY = "#3498db";
-    private static final String TEXT = "#2c3e50";
+    private static final String PRIMARY = "#1370f3";      // ColorBrush3
+    private static final String PRIMARY_DARK = "#0b5bcb"; // ColorBrush2
+    private static final String TITLE_BAR = "#4890f5";    // ColorBrush4
+    private static final String TEXT = "#343d4a";         // ColorBrush1
+    private static final String GRAY2 = "#737373";
 
     private final Stage stage;
     private final BorderPane root = new BorderPane();
@@ -113,16 +118,17 @@ public final class MainWindow {
     // ================= 顶栏与框架 =================
     private void buildUi() {
         Label logo = new Label("PCLGE2");
-        logo.setFont(Font.font("Segoe UI", FontWeight.BOLD, 20));
+        logo.setFont(Font.font("Microsoft YaHei UI", FontWeight.BOLD, 17));
         logo.setTextFill(Color.web("#ffffff"));
         Label ver = new Label("2.00");
-        ver.setTextFill(Color.web("#d6eaf8"));
+        ver.setFont(Font.font("Microsoft YaHei UI", 12));
+        ver.setTextFill(Color.web("#d5e6fd"));
 
-        HBox nav = new HBox(8);
+        HBox nav = new HBox(2);
         for (int i = 0; i < NAV.length; i++) {
             Button b = new Button(NAV[i]);
             b.setStyle(navStyle(false));
-            b.setPadding(new Insets(5, 18, 5, 18));
+            b.setMinHeight(27);
             b.setMinWidth(64);
             navButtons[i] = b;
             nav.getChildren().add(b);
@@ -131,8 +137,10 @@ public final class MainWindow {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         HBox top = new HBox(10, logo, ver, spacer, nav);
         top.setAlignment(Pos.CENTER_LEFT);
-        top.setPadding(new Insets(8, 14, 8, 14));
-        top.setStyle("-fx-background-color: linear-gradient(to right, #2c3e50, #34495e);");
+        top.setMinHeight(48);
+        top.setPrefHeight(48);
+        top.setPadding(new Insets(0, 12, 0, 14));
+        top.setStyle("-fx-background-color: " + TITLE_BAR + ";");
         root.setTop(top);
 
         pages[0] = buildLaunchPage();
@@ -147,25 +155,33 @@ public final class MainWindow {
 
         logArea.setEditable(false);
         logArea.setPrefRowCount(3);
-        logArea.setStyle("-fx-font-family: Consolas, monospace; -fx-font-size: 12px;");
+        logArea.setStyle("-fx-font-family: Consolas, monospace; -fx-font-size: 12px; -fx-text-fill: " + GRAY2 + "; -fx-background-color: transparent;");
         progressBar.setMaxWidth(Double.MAX_VALUE);
         HBox statusBar = new HBox(8, statusLabel, progressBar);
         HBox.setHgrow(progressBar, Priority.ALWAYS);
         statusBar.setAlignment(Pos.CENTER_LEFT);
         statusBar.setPadding(new Insets(4, 10, 4, 10));
         VBox bottom = new VBox(logArea, statusBar);
-        bottom.setStyle("-fx-background-color: #fafbfc;");
+        bottom.setStyle("-fx-background-color: #ffffff; -fx-border-color: #e0eafd; -fx-border-width: 1 0 0 0;");
         root.setBottom(bottom);
 
         showPage(0);
-        stage.setScene(new Scene(root, 1100, 720));
+        Scene scene = new Scene(root, 1100, 720);
+        java.net.URL css = MainWindow.class.getResource("/pclge2/pclge2.css");
+        if (css != null) {
+            scene.getStylesheets().add(css.toExternalForm());
+        }
+        stage.setScene(scene);
         stage.setTitle("PCLGE2");
     }
 
+    /** PCL 导航胶囊：选中=白底蓝字，未选中=透明白字，悬停=50% 白 */
     private String navStyle(boolean active) {
         return active
-                ? "-fx-background-color: " + PRIMARY + "; -fx-text-fill: white; -fx-font-size: 13px; -fx-background-radius: 4;"
-                : "-fx-background-color: transparent; -fx-text-fill: #d6eaf8; -fx-font-size: 13px;";
+                ? "-fx-background-color: #ffffff; -fx-text-fill: " + PRIMARY
+                + "; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 13.5; -fx-border-color: transparent; -fx-border-width: 0; -fx-padding: 5 14 5 14; -fx-cursor: hand;"
+                : "-fx-background-color: transparent; -fx-text-fill: #ffffff; -fx-font-size: 13px;"
+                + " -fx-background-radius: 13.5; -fx-border-color: transparent; -fx-border-width: 0; -fx-padding: 5 14 5 14; -fx-cursor: hand;";
     }
 
     private void showPage(int index) {
@@ -181,20 +197,33 @@ public final class MainWindow {
     private VBox card(Node... content) {
         VBox box = new VBox(8, content);
         box.setPadding(new Insets(12));
-        box.setStyle("-fx-background-color: " + CARD + "; -fx-background-radius: 6;");
+        box.setStyle("-fx-background-color: " + CARD + "; -fx-background-radius: 8;"
+                + " -fx-effect: dropshadow(gaussian, rgba(52,61,74,0.08), 8, 0, 0, 2);");
         return box;
     }
 
     private Label title(String text) {
         Label l = new Label(text);
-        l.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+        l.setFont(Font.font("Microsoft YaHei UI", FontWeight.BOLD, 14));
         l.setTextFill(Color.web(TEXT));
         return l;
     }
 
     private Button primary(String text) {
+        // PCL 按钮：白底 + 主题色文字 + 1px 主题色边框，圆角 3
         Button b = new Button(text);
-        b.setStyle("-fx-background-color: " + PRIMARY + "; -fx-text-fill: white; -fx-font-weight: bold;");
+        b.setStyle("-fx-background-color: #ffffff; -fx-text-fill: " + PRIMARY_DARK
+                + "; -fx-font-size: 13px; -fx-border-color: " + PRIMARY
+                + "; -fx-border-radius: 3; -fx-background-radius: 3; -fx-padding: 5 16 5 16; -fx-cursor: hand;");
+        return b;
+    }
+
+    /** PCL 普通按钮 */
+    private Button normal(String text) {
+        Button b = new Button(text);
+        b.setStyle("-fx-background-color: #ffffff; -fx-text-fill: " + TEXT
+                + "; -fx-font-size: 13px; -fx-border-color: #d5e6fd"
+                + "; -fx-border-radius: 3; -fx-background-radius: 3; -fx-padding: 5 14 5 14; -fx-cursor: hand;");
         return b;
     }
 
@@ -202,10 +231,11 @@ public final class MainWindow {
     private VBox sideBar(String heading, Node... content) {
         VBox box = new VBox(8, title(heading));
         box.getChildren().addAll(content);
-        box.setPadding(new Insets(12));
+        box.setPadding(new Insets(12, 8, 12, 12));
         box.setPrefWidth(250);
         box.setMinWidth(250);
-        box.setStyle("-fx-background-color: " + CARD + "; -fx-background-radius: 6;");
+        // 左侧栏用 PCL 的半透明白（ColorBrushBackgroundTransparentSidebar = F1FFFFFF）
+        box.setStyle("-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 8;");
         return box;
     }
 
@@ -308,6 +338,7 @@ public final class MainWindow {
 
         // ---- 游戏版本面板
         downloadList.setPrefHeight(280);
+        downloadList.setPlaceholder(new Label("点「刷新版本列表」加载可用游戏版本"));
         loaderBox.getItems().addAll("原版（无加载器）", "Fabric", "Quilt", "Forge", "NeoForge");
         loaderBox.setMinHeight(26);
         loaderBox.getSelectionModel().select(0);
@@ -318,6 +349,7 @@ public final class MainWindow {
         installBtn.setOnAction(e -> installSelectedVersion());
 
         localVersionList.setPrefHeight(110);
+        localVersionList.setPlaceholder(new Label("暂无已安装版本"));
         VBox gamePane = new VBox(10,
                 new HBox(8, new Label("下载源"), downloadSourceBox, fetchVersions),
                 downloadList,
@@ -444,7 +476,7 @@ public final class MainWindow {
 
         VBox aboutPane = new VBox(12, card(title("关于 PCLGE2"),
                 new Label("PCLGE2 2.00（Java 17 + JavaFX 版）"),
-                new Label("原版 PCL 结构的 Java 复刻"),
+                new Label("界面皮肤取自 PCLCE 官方配色与控件样式"),
                 new Label("配置文件：" + PathConfig.launcherDir().resolve("pclge-config.properties"))));
 
         setupHost.getChildren().addAll(launcherPane, javaPane, downloadPane, managePane, aboutPane);

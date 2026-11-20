@@ -3,6 +3,17 @@ PCLGE2 —— Java 17 + JavaFX 17 的 Minecraft 启动器
 版本 2.00。界面结构对齐原版 PCL：顶部 6 个一级导航（启动 / 基岩版 / 下载 / 设置 / 工具 / 联机），
 每页「左子页列表 + 右内容」双栏，底部常驻日志与状态栏。
 
+视觉皮肤
+--------
+取自 PCLCE 官方源码，不是自创配色：
+- 标题栏 #4890f5（ColorBrush4），高 48px
+- 主色 #1370f3（ColorBrush3）、深色 #0b5bcb（ColorBrush2）
+- 正文色 #343d4a（ColorBrush1），辅助灰 #737373
+- 页面底色 #eaf2fe（ColorBrush8），左侧栏 rgba(255,255,255,0.95)（对应 F1FFFFFF）
+- 导航胶囊：高 27px、圆角 13.5，选中白底蓝字
+- 卡片：白底、圆角 8、轻投影（对应 PCL 内容卡片）
+样式集中在 `src/main/resources/pclge2/pclge2.css`，改主题色只需改这一处。
+
 功能
 ----
 1. 启动：离线账户（自动生成 UUID）、内存与 JVM 参数、版本列表、切换游戏目录
@@ -20,7 +31,7 @@ PCLGE2 —— Java 17 + JavaFX 17 的 Minecraft 启动器
 
 构建
 ----
-bash build.sh                      # 编译 + 打 jar + 同步 dist
+bash build.sh                      # 编译 + 打 jar + 同步 dist（含 CSS 资源）
 cd dist && java -cp ../../launch4j/launch4j.jar net.sf.launch4j.Main l4j.xml   # 生成 PCLGE2.exe
 
 直接运行
@@ -38,4 +49,4 @@ JavaFX 17 base / controls / graphics（win 与 linux 两套）
 src/main/java/pclge2/Main.java              入口
 src/main/java/pclge2/ui/MainWindow.java     JavaFX 界面
 src/main/java/pclge2/core/*.java            版本 / 下载 / 启动 / 账户 / 模组 / 联机
-dist/                                       Windows 发行目录（PCLGE2.exe + 内置 JRE17）
+src/main/resources/pclge2/pclge2.css        PCLCE 皮肤
