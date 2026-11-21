@@ -1,7 +1,7 @@
 /* PCLGE2 皮肤：取 PCLCE 官方配色与控件样式 */
 .root {
-    -fx-font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI";
-    -fx-font-size: 13px;
+    -fx-font-family: "Minecraft Next Font";
+    -fx-font-size: 12px;
     -fx-text-fill: #343d4a;
 }
 
@@ -13,7 +13,8 @@
     -fx-border-width: 1;
     -fx-border-radius: 3;
     -fx-background-radius: 3;
-    -fx-padding: 5 12 5 12;
+    -fx-padding: 6 12 6 12;
+    -fx-font-size: 12px;
     -fx-cursor: hand;
 }
 .button:hover {
@@ -33,7 +34,7 @@
 .list-cell {
     -fx-background-color: transparent;
     -fx-text-fill: #343d4a;
-    -fx-padding: 8 10 8 10;
+    -fx-padding: 5 10 5 10;
     -fx-background-radius: 4;
 }
 .list-cell:filled:hover {
@@ -46,10 +47,14 @@
 
 /* 输入框 / 下拉框 */
 .text-field, .text-area, .combo-box, .spinner {
+    -fx-font-size: 12px;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
     -fx-background-color: #ffffff;
     -fx-border-color: #d5e6fd;
     -fx-border-radius: 3;
     -fx-background-radius: 3;
+    -fx-padding: 4 8 4 8;
 }
 .text-field:focused, .text-area:focused, .combo-box:focused {
     -fx-border-color: #1370f3;

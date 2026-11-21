@@ -14,6 +14,15 @@ PCLGE2 —— Java 17 + JavaFX 17 的 Minecraft 启动器
 - 卡片：白底、圆角 8、轻投影（对应 PCL 内容卡片）
 样式集中在 `src/main/resources/pclge2/pclge2.css`，改主题色只需改这一处。
 
+字体
+----
+界面字体为 Minecraft Next Font（12px 像素字体），文件：
+`src/main/resources/pclge2/fonts/Minecraft_Next_Font_12px.ttf`，启动时由 MainWindow 通过
+`Font.loadFont` 动态注册，CSS 里的 `-fx-font-family: "Minecraft Next Font"` 直接引用。
+字体缺位时自动回退到系统字体（Microsoft YaHei UI），不会崩。
+该字体含中英文共 19251 个字形，中文界面文字也能正常显示。
+字体是二进制文件，若从 GitHub 拉取后缺失，请把 ttf 放回上述路径再构建。
+
 功能
 ----
 1. 启动：离线账户（自动生成 UUID）、内存与 JVM 参数、版本列表、切换游戏目录
@@ -25,13 +34,6 @@ PCLGE2 —— Java 17 + JavaFX 17 的 Minecraft 启动器
 6. 基岩版：一键下载 BDS（官方下载接口，正式版 / 预览版，自动按 Windows / Linux 选包），
    下载后自动解压到 `启动器目录/bedrock/<版本>` 并关联，也可手动选择已解压目录后启动
 
-基岩版下载说明
---------------
-接口：`https://net-secondary.web.minecraft-services.net/api/v1.0/download/links`
-返回 serverBedrockWindows / serverBedrockLinux / 预览版变体直链（例：bedrock-server-1.26.66.1.zip）。
-点击「基岩版 → 安装 → 检查更新」拉到最新版本号，再点「下载并安装 BDS」：下载 → 解压 → 写回配置 bedrockDir，
-进度显示在底部状态栏，日志在底部日志区与「工具 → 日志」同步。
-
 环境
 ----
 编译：JDK 17 + JavaFX 17
@@ -39,7 +41,7 @@ PCLGE2 —— Java 17 + JavaFX 17 的 Minecraft 启动器
 
 构建
 ----
-bash build.sh                      # 编译 + 打 jar + 同步 dist（含 CSS 资源）
+bash build.sh                      # 编译 + 打 jar + 同步 dist（含 CSS 与字体资源）
 cd dist && java -cp ../../launch4j/launch4j.jar net.sf.launch4j.Main l4j.xml   # 生成 PCLGE2.exe
 
 直接运行
@@ -58,3 +60,4 @@ src/main/java/pclge2/Main.java              入口
 src/main/java/pclge2/ui/MainWindow.java     JavaFX 界面
 src/main/java/pclge2/core/*.java            版本 / 下载 / 启动 / 账户 / 模组 / 联机 / 基岩版下载
 src/main/resources/pclge2/pclge2.css        PCLCE 皮肤
+src/main/resources/pclge2/fonts/*.ttf       Minecraft Next Font
