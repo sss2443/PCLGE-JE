@@ -15,7 +15,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import pclge2.core.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,222 +22,240 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
-/** PCLGE2 主窗口：结构对齐 PCL / PCLCE，皮肤取 PCLCE 官方配色，字体 Minecraft Next Font。 */
-public final class MainWindow {
-
-    private static final String BG = "#eaf2fe";
-    private static final String CARD = "#ffffff";
-    private static final String PRIMARY = "#1370f3";
-    private static final String PRIMARY_DARK = "#0b5bcb";
-    private static final String TITLE_BAR = "#4890f5";
-    private static final String TEXT = "#343d4a";
-    private static final String GRAY2 = "#737373";
-
-    private static final String FONT_RES = "/pclge2/fonts/Minecraft_Next_Font_12px.ttf";
-    private static String fontFamily;
-
-    private static synchronized String fontFamily() {
-        if (fontFamily == null) {
-            Font loaded = null;
-            try {
-                loaded = Font.loadFont(MainWindow.class.getResourceAsStream(FONT_RES), 12);
-            } catch (Exception ignored) {
-            }
-            fontFamily = loaded != null ? loaded.getFamily() : "Microsoft YaHei UI";
-        }
-        return fontFamily;
-    }
-
-    private final Stage stage;
-    private final BorderPane root = new BorderPane();
-    private final StackPane pageHost = new StackPane();
-    private final TextArea logArea = new TextArea();
-    private final TextArea logPageArea = new TextArea();
-    private final Label statusLabel = new Label("就绪");
-    private final ProgressBar progressBar = new ProgressBar(0);
-
-    private static final String[] NAV = {"启动", "基岩版", "下载", "设置", "工具", "联机"};
-    private final Button[] navButtons = new Button[NAV.length];
-    private final Node[] pages = new Node[NAV.length];
-
-    private final TextField playerNameField = new TextField(PathConfig.get("playerName", "Steve"));
-    private final Spinner<Integer> memorySpinner = new Spinner<>(512, 16384,
-            Integer.parseInt(PathConfig.get("memory", "2048")), 256);
-    private final ComboBox<String> setupSourceBox = new ComboBox<>();
-    private final ComboBox<String> downloadSourceBox = new ComboBox<>();
-    private final Label gameDirLabel = new Label();
-    private final Label javaLabel = new Label(GameLauncher.findJava().toString());
-    private final Label launchJavaLabel = new Label(GameLauncher.findJava().toString());
-    private final TextField jvmArgsField = new TextField(PathConfig.get("jvmArgs", ""));
-
-    private final ListView<String> launchVersionList = new ListView<>();
-    private final Label launchVersionTitle = new Label("未选择版本");
-
-    private final Label bedrockStatus = new Label("未检测到基岩版服务端目录");
-    private final TextField bedrockPortField = new TextField("19132");
-    private final Label bedrockPortLabel = new Label("端口 19132");
-
-    private final ListView<String> downloadList = new ListView<>();
-    private final ComboBox<String> loaderBox = new ComboBox<>();
-    private final TextField loaderVersionField = new TextField();
-    private final ListView<String> localVersionList = new ListView<>();
-    private final ListView<String> shopResultList = new ListView<>();
-    private final TextField shopQueryField = new TextField();
-    private final TextField shopTargetVersionField = new TextField();
-    private final ComboBox<String> shopLoaderBox = new ComboBox<>();
-    private final Label shopStatus = new Label("");
-    private final ListView<String> dlCategory = new ListView<>();
-    private final StackPane dlHost = new StackPane();
-    private String shopCurrentType = "mod";
-
-    private final ListView<String> setupNavList = new ListView<>();
-    private final StackPane setupHost = new StackPane();
-    private final ListView<String> instanceList = new ListView<>();
-    private final ListView<String> instanceModList = new ListView<>();
-    private final ListView<String> instancePackList = new ListView<>();
-    private final ListView<String> instanceSaveList = new ListView<>();
-
-    private final ListView<String> toolsNavList = new ListView<>();
-    private final StackPane toolsHost = new StackPane();
-    private final TextField littleSkinUser = new TextField();
-    private final TextField skinTargetName = new TextField("Steve");
-    private final Label skinStatus = new Label("");
-
-    private final LanChat lanChat = new LanChat();
-    private final TextField chatNickField = new TextField("Steve");
-    private final TextArea chatArea = new TextArea();
-    private final TextField chatInput = new TextField();
-    private final ListView<String> peerList = new ListView<>();
-    private final Button chatToggleButton = new Button("启动联机");
+/** PCLGE2 主窗口：启动、目录、实例、联机与皮肤行为。 */
+public final class MainWindow extends MainWindowActions {
 
     public MainWindow(Stage stage) {
-        this.stage = stage;
-        buildUi();
-        wire();
-        refreshAll();
+        super(stage);
     }
 
-    private void buildUi() {
-        Label logo = new Label("PCLGE2");
-        logo.setFont(Font.font(fontFamily(), FontWeight.BOLD, 17));
-        logo.setTextFill(Color.web("#ffffff"));
-        Label ver = new Label("2.00");
-        ver.setFont(Font.font(fontFamily(), 12));
-        ver.setTextFill(Color.web("#d5e6fd"));
-
-        HBox nav = new HBox(2);
-        for (int i = 0; i < NAV.length; i++) {
-            Button b = new Button(NAV[i]);
-            b.setStyle(navStyle(false));
-            b.setMinHeight(30);
-            b.setMinWidth(64);
-            navButtons[i] = b;
-            nav.getChildren().add(b);
+    // ================= 启动 / 目录 / 存档 / 基岩版 =================
+    protected void launchGame() {
+        String version = launchVersionList.getSelectionModel().getSelectedItem();
+        if (version == null) {
+            status("先在左侧选一个版本");
+            return;
         }
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox top = new HBox(10, logo, ver, spacer, nav);
-        top.setAlignment(Pos.CENTER_LEFT);
-        top.setMinHeight(48);
-        top.setPrefHeight(48);
-        top.setPadding(new Insets(0, 12, 0, 14));
-        top.setStyle("-fx-background-color: " + TITLE_BAR + ";");
-        root.setTop(top);
-
-        pages[0] = buildLaunchPage();
-        pages[1] = buildBedrockPage();
-        pages[2] = buildDownloadPage();
-        pages[3] = buildSetupPage();
-        pages[4] = buildToolsPage();
-        pages[5] = buildLinkPage();
-        pageHost.getChildren().addAll(pages);
-        pageHost.setStyle("-fx-background-color: " + BG + ";");
-        root.setCenter(pageHost);
-
-        logArea.setEditable(false);
-        logArea.setPrefRowCount(3);
-        logArea.setStyle("-fx-font-family: Consolas, monospace; -fx-font-size: 12px; -fx-text-fill: " + GRAY2 + "; -fx-background-color: transparent;");
-        progressBar.setMaxWidth(Double.MAX_VALUE);
-        HBox statusBar = new HBox(8, statusLabel, progressBar);
-        HBox.setHgrow(progressBar, Priority.ALWAYS);
-        statusBar.setAlignment(Pos.CENTER_LEFT);
-        statusBar.setPadding(new Insets(4, 10, 4, 10));
-        VBox bottom = new VBox(logArea, statusBar);
-        bottom.setStyle("-fx-background-color: #ffffff; -fx-border-color: #e0eafd; -fx-border-width: 1 0 0 0;");
-        root.setBottom(bottom);
-
-        root.setStyle("-fx-font-family: \"" + fontFamily() + "\";");
-        showPage(0);
-        Scene scene = new Scene(root, 1100, 720);
-        java.net.URL css = MainWindow.class.getResource("/pclge2/pclge2.css");
-        if (css != null) {
-            scene.getStylesheets().add(css.toExternalForm());
+        String name = playerNameField.getText().trim();
+        if (name.isEmpty()) {
+            status("填写离线账户名");
+            return;
         }
-        stage.setScene(scene);
-        stage.setTitle("PCLGE2");
+        Account.Profile profile = Account.Profile.offline(name);
+        status("启动 " + version);
+        new Thread(() -> {
+            try {
+                int code = GameLauncher.launch(new GameLauncher.LaunchOptions(version, profile.name(), profile.uuid(),
+                        profile.accessToken(), memorySpinner.getValue(),
+                        jvmArgsField.getText().isBlank() ? null : List.of(jvmArgsField.getText().split(" "))),
+                        s -> Platform.runLater(() -> log(s)));
+                Platform.runLater(() -> status("游戏已退出，代码 " + code));
+            } catch (Exception ex) {
+                Platform.runLater(() -> status("启动失败：" + ex.getMessage()));
+            }
+        }, "launch").start();
     }
 
-    private String navStyle(boolean active) {
-        return active
-                ? "-fx-background-color: #ffffff; -fx-text-fill: " + PRIMARY
-                + "; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 13.5; -fx-border-color: transparent; -fx-border-width: 0; -fx-padding: 5 14 5 14; -fx-cursor: hand;"
-                : "-fx-background-color: transparent; -fx-text-fill: #ffffff; -fx-font-size: 12px;"
-                + " -fx-background-radius: 13.5; -fx-border-color: transparent; -fx-border-width: 0; -fx-padding: 5 14 5 14; -fx-cursor: hand;";
-    }
-
-    private void showPage(int index) {
-        for (int i = 0; i < pages.length; i++) {
-            pages[i].setVisible(i == index);
-            navButtons[i].setStyle(navStyle(i == index));
+    protected void chooseGameDir() {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("选择 .minecraft 目录");
+        File dir = chooser.showDialog(stage);
+        if (dir == null) {
+            return;
         }
-        pages[index].toFront();
-        pages[index].setVisible(true);
+        try {
+            PathConfig.setGameDir(dir.toPath());
+            refreshAll();
+            status("游戏目录已改为：" + dir.getAbsolutePath());
+        } catch (IOException ex) {
+            status("设置失败：" + ex.getMessage());
+        }
     }
 
-    private VBox card(Node... content) {
-        VBox box = new VBox(8, content);
-        box.setPadding(new Insets(12));
-        box.setStyle("-fx-background-color: " + CARD + "; -fx-background-radius: 8;"
-                + " -fx-effect: dropshadow(gaussian, rgba(52,61,74,0.08), 8, 0, 0, 2);");
-        return box;
+    protected void moveSavesDialog() {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("选择旧游戏目录");
+        File dir = chooser.showDialog(stage);
+        if (dir == null) {
+            return;
+        }
+        Path sourceDir = dir.toPath();
+        status("移动存档中...");
+        new Thread(() -> {
+            try {
+                int count = PathConfig.moveSaves(sourceDir, PathConfig.gameDir());
+                Platform.runLater(() -> status("已复制 " + count + " 个世界"));
+            } catch (Exception ex) {
+                Platform.runLater(() -> status("移动失败：" + ex.getMessage()));
+            }
+        }, "move-saves").start();
     }
 
-    private Label title(String text) {
-        Label l = new Label(text);
-        l.setFont(Font.font(fontFamily(), FontWeight.BOLD, 14));
-        l.setTextFill(Color.web(TEXT));
-        return l;
+    protected void startBedrock() {
+        String dir = PathConfig.get("bedrockDir", "");
+        if (dir.isBlank() || !Files.isDirectory(Path.of(dir))) {
+            status("先下载或选择 BDS 目录");
+            return;
+        }
+        try {
+            Path exe = VersionManager.osName().equals("windows")
+                    ? Path.of(dir, "bedrock_server.exe") : Path.of(dir, "bedrock_server");
+            if (!Files.exists(exe)) {
+                status("目录里没有 bedrock_server");
+                return;
+            }
+            new ProcessBuilder(exe.toString()).directory(new File(dir)).start();
+            status("基岩版服务端已启动，端口 " + bedrockPortField.getText());
+        } catch (IOException ex) {
+            status("启动失败：" + ex.getMessage());
+        }
     }
 
-    private Button primary(String text) {
-        Button b = new Button(text);
-        b.setStyle("-fx-background-color: #ffffff; -fx-text-fill: " + PRIMARY_DARK
-                + "; -fx-font-size: 12px; -fx-border-color: " + PRIMARY
-                + "; -fx-border-radius: 3; -fx-background-radius: 3; -fx-padding: 5 16 5 16; -fx-cursor: hand;");
-        return b;
+    // ================= 实例操作 =================
+    protected void toggleInstanceMod() {
+        String version = instanceList.getSelectionModel().getSelectedItem();
+        String mod = instanceModList.getSelectionModel().getSelectedItem();
+        if (version == null || mod == null) {
+            status("先选版本和模组");
+            return;
+        }
+        try {
+            ModManager.toggle(version, mod.substring(mod.indexOf(']') + 2));
+            refreshInstanceDetail(version);
+            status("已切换");
+        } catch (IOException ex) {
+            status("切换失败：" + ex.getMessage());
+        }
     }
 
-    private Button normal(String text) {
-        Button b = new Button(text);
-        b.setStyle("-fx-background-color: #ffffff; -fx-text-fill: " + TEXT
-                + "; -fx-font-size: 12px; -fx-border-color: #d5e6fd"
-                + "; -fx-border-radius: 3; -fx-background-radius: 3; -fx-padding: 5 14 5 14; -fx-cursor: hand;");
-        return b;
+    protected void addModDialog() {
+        String version = instanceList.getSelectionModel().getSelectedItem();
+        if (version == null) {
+            status("先选版本");
+            return;
+        }
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("选择模组 jar");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("模组", "*.jar"));
+        File file = chooser.showOpenDialog(stage);
+        if (file == null) {
+            return;
+        }
+        try {
+            ModManager.add(version, file.toPath());
+            refreshInstanceDetail(version);
+            status("已添加：" + file.getName());
+        } catch (IOException ex) {
+            status("添加失败：" + ex.getMessage());
+        }
     }
 
-    private VBox sideBar(String heading, Node... content) {
-        VBox box = new VBox(8, title(heading));
-        box.getChildren().addAll(content);
-        box.setPadding(new Insets(12, 8, 12, 12));
-        box.setPrefWidth(250);
-        box.setMinWidth(250);
-        box.setStyle("-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 8;");
-        return box;
+    protected void deleteInstanceMod() {
+        String version = instanceList.getSelectionModel().getSelectedItem();
+        String mod = instanceModList.getSelectionModel().getSelectedItem();
+        if (version == null || mod == null) {
+            return;
+        }
+        try {
+            ModManager.delete(version, mod.substring(mod.indexOf(']') + 2));
+            refreshInstanceDetail(version);
+            status("已删除");
+        } catch (IOException ex) {
+            status("删除失败：" + ex.getMessage());
+        }
     }
 
-    private HBox twoPane(Node left, Node right) {
-        HBox box = new HBox(12, left, right);
-        box.setPadding(new Insets(12));
-        HBox.setHgrow(right, Priority.ALWAYS);
-        return box;
+    // ================= 联机 / 皮肤 =================
+    protected void toggleChat() {
+        if (chatToggleButton.getText().startsWith("停止")) {
+            lanChat.close();
+            chatToggleButton.setText("启动联机");
+            status("联机已停止");
+            return;
+        }
+        try {
+            lanChat.start(chatNickField.getText().isBlank() ? "玩家" : chatNickField.getText().trim());
+            chatToggleButton.setText("停止联机");
+            status("联机已启动，端口 " + LanChat.PORT);
+            new Thread(() -> {
+                while (chatToggleButton.getText().startsWith("停止")) {
+                    lanChat.heartbeat();
+                    try {
+                        Thread.sleep(20_000);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }, "heartbeat").start();
+        } catch (IOException ex) {
+            status("启动失败：" + ex.getMessage());
+        }
     }
+
+    protected void sendChat() {
+        String msg = chatInput.getText().trim();
+        if (msg.isEmpty()) {
+            return;
+        }
+        try {
+            lanChat.send(msg);
+            chatArea.appendText("我：" + msg + "\n");
+            chatInput.clear();
+        } catch (IOException ex) {
+            status("发送失败：" + ex.getMessage());
+        }
+    }
+
+    protected void downloadLittleSkinSkin() {
+        String user = littleSkinUser.getText().trim();
+        if (!Account.validUserName(user)) {
+            skinStatus.setText("用户名只能字母、数字、下划线，1-16 位");
+            return;
+        }
+        skinStatus.setText("正在下载...");
+        new Thread(() -> {
+            try {
+                Path file = Account.downloadLittleSkin(user);
+                Platform.runLater(() -> skinStatus.setText("已下载：" + file));
+            } catch (Exception ex) {
+                Platform.runLater(() -> skinStatus.setText("下载失败：" + ex.getMessage()));
+            }
+        }, "ls-skin").start();
+    }
+
+    protected void importSkinDialog() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("选择皮肤图片");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("图片", "*.png", "*.jpg", "*.jpeg"));
+        File file = chooser.showOpenDialog(stage);
+        if (file == null) {
+            return;
+        }
+        try {
+            skinStatus.setText("已导入：" + Account.importSkin(file.toPath(), skinTargetName.getText().trim()));
+        } catch (IOException ex) {
+            skinStatus.setText("导入失败：" + ex.getMessage());
+        }
+    }
+
+    protected void customSkinDialog() {
+        String target = skinTargetName.getText().trim();
+        if (target.isEmpty()) {
+            skinStatus.setText("先填账户名");
+            return;
+        }
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("选择自定义皮肤");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("图片", "*.png", "*.jpg", "*.jpeg"));
+        File file = chooser.showOpenDialog(stage);
+        if (file == null) {
+            return;
+        }
+        try {
+            skinStatus.setText("自定义皮肤已应用：" + Account.importSkin(file.toPath(), target));
+        } catch (IOException ex) {
+            skinStatus.setText("设置失败：" + ex.getMessage());
+        }
+    }
+
+}
