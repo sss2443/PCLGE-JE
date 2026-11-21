@@ -23,24 +23,17 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * PCLGE2 主窗口（JavaFX）—— 结构对齐原版 PCL / PCLCE：
- * 顶部一级导航：启动 / 基岩版 / 下载 / 设置 / 工具 / 联机；
- * 每个一级页内部是「左侧子页列表 + 右侧内容」双栏；底部常驻日志面板。
- * 视觉皮肤取 PCLCE 官方配色与控件样式（Application.xaml / MyButton / MyRadioButton / MyListItem）。
- */
+/** PCLGE2 主窗口：结构对齐 PCL / PCLCE，皮肤取 PCLCE 官方配色，字体 Minecraft Next Font。 */
 public final class MainWindow {
 
-    // PCLCE 官方配色（取自 Application.xaml 的 ColorBrush 表）
-    private static final String BG = "#eaf2fe";          // ColorBrush8
+    private static final String BG = "#eaf2fe";
     private static final String CARD = "#ffffff";
-    private static final String PRIMARY = "#1370f3";      // ColorBrush3
-    private static final String PRIMARY_DARK = "#0b5bcb"; // ColorBrush2
-    private static final String TITLE_BAR = "#4890f5";    // ColorBrush4
-    private static final String TEXT = "#343d4a";         // ColorBrush1
+    private static final String PRIMARY = "#1370f3";
+    private static final String PRIMARY_DARK = "#0b5bcb";
+    private static final String TITLE_BAR = "#4890f5";
+    private static final String TEXT = "#343d4a";
     private static final String GRAY2 = "#737373";
 
-    /** MC Next 字体所在资源；加载失败则回退系统字体 */
     private static final String FONT_RES = "/pclge2/fonts/Minecraft_Next_Font_12px.ttf";
     private static String fontFamily;
 
@@ -68,7 +61,6 @@ public final class MainWindow {
     private final Button[] navButtons = new Button[NAV.length];
     private final Node[] pages = new Node[NAV.length];
 
-    // 通用
     private final TextField playerNameField = new TextField(PathConfig.get("playerName", "Steve"));
     private final Spinner<Integer> memorySpinner = new Spinner<>(512, 16384,
             Integer.parseInt(PathConfig.get("memory", "2048")), 256);
@@ -79,16 +71,13 @@ public final class MainWindow {
     private final Label launchJavaLabel = new Label(GameLauncher.findJava().toString());
     private final TextField jvmArgsField = new TextField(PathConfig.get("jvmArgs", ""));
 
-    // 启动页
     private final ListView<String> launchVersionList = new ListView<>();
     private final Label launchVersionTitle = new Label("未选择版本");
 
-    // 基岩版
     private final Label bedrockStatus = new Label("未检测到基岩版服务端目录");
     private final TextField bedrockPortField = new TextField("19132");
     private final Label bedrockPortLabel = new Label("端口 19132");
 
-    // 下载页
     private final ListView<String> downloadList = new ListView<>();
     private final ComboBox<String> loaderBox = new ComboBox<>();
     private final TextField loaderVersionField = new TextField();
@@ -102,7 +91,6 @@ public final class MainWindow {
     private final StackPane dlHost = new StackPane();
     private String shopCurrentType = "mod";
 
-    // 设置 / 版本管理
     private final ListView<String> setupNavList = new ListView<>();
     private final StackPane setupHost = new StackPane();
     private final ListView<String> instanceList = new ListView<>();
@@ -110,14 +98,12 @@ public final class MainWindow {
     private final ListView<String> instancePackList = new ListView<>();
     private final ListView<String> instanceSaveList = new ListView<>();
 
-    // 工具
     private final ListView<String> toolsNavList = new ListView<>();
     private final StackPane toolsHost = new StackPane();
     private final TextField littleSkinUser = new TextField();
     private final TextField skinTargetName = new TextField("Steve");
     private final Label skinStatus = new Label("");
 
-    // 联机
     private final LanChat lanChat = new LanChat();
     private final TextField chatNickField = new TextField("Steve");
     private final TextArea chatArea = new TextArea();
@@ -132,7 +118,6 @@ public final class MainWindow {
         refreshAll();
     }
 
-    // ================= 顶栏与框架 =================
     private void buildUi() {
         Label logo = new Label("PCLGE2");
         logo.setFont(Font.font(fontFamily(), FontWeight.BOLD, 17));
@@ -193,7 +178,6 @@ public final class MainWindow {
         stage.setTitle("PCLGE2");
     }
 
-    /** PCL 导航胶囊：选中=白底蓝字，未选中=透明白字，悬停=50% 白 */
     private String navStyle(boolean active) {
         return active
                 ? "-fx-background-color: #ffffff; -fx-text-fill: " + PRIMARY
@@ -211,7 +195,6 @@ public final class MainWindow {
         pages[index].setVisible(true);
     }
 
-    // ================= 原子组件 =================
     private VBox card(Node... content) {
         VBox box = new VBox(8, content);
         box.setPadding(new Insets(12));
@@ -228,7 +211,6 @@ public final class MainWindow {
     }
 
     private Button primary(String text) {
-        // PCL 按钮：白底 + 主题色文字 + 1px 主题色边框，圆角 3
         Button b = new Button(text);
         b.setStyle("-fx-background-color: #ffffff; -fx-text-fill: " + PRIMARY_DARK
                 + "; -fx-font-size: 12px; -fx-border-color: " + PRIMARY
@@ -236,7 +218,6 @@ public final class MainWindow {
         return b;
     }
 
-    /** PCL 普通按钮 */
     private Button normal(String text) {
         Button b = new Button(text);
         b.setStyle("-fx-background-color: #ffffff; -fx-text-fill: " + TEXT
@@ -245,14 +226,12 @@ public final class MainWindow {
         return b;
     }
 
-    /** 左侧子页列表栏 */
     private VBox sideBar(String heading, Node... content) {
         VBox box = new VBox(8, title(heading));
         box.getChildren().addAll(content);
         box.setPadding(new Insets(12, 8, 12, 12));
         box.setPrefWidth(250);
         box.setMinWidth(250);
-        // 左侧栏用 PCL 的半透明白（ColorBrushBackgroundTransparentSidebar = F1FFFFFF）
         box.setStyle("-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 8;");
         return box;
     }
@@ -262,42 +241,4 @@ public final class MainWindow {
         box.setPadding(new Insets(12));
         HBox.setHgrow(right, Priority.ALWAYS);
         return box;
-    }
-
-    // ================= 启动页 =================
-    private Node buildLaunchPage() {
-        launchVersionList.setPrefHeight(400);
-        Button changeDir = new Button("切换游戏目录");
-        changeDir.setOnAction(e -> chooseGameDir());
-        Button refresh = new Button("刷新");
-        refresh.setOnAction(e -> refreshLaunchVersions());
-        launchVersionList.getSelectionModel().selectedItemProperty().addListener(
-                (o, a, b) -> launchVersionTitle.setText(b == null ? "未选择版本" : b));
-
-        Button launchBtn = primary("启动游戏");
-        launchBtn.setPrefWidth(180);
-        launchBtn.setOnAction(e -> launchGame());
-
-        GridPane panel = new GridPane();
-        panel.setHgap(10);
-        panel.setVgap(10);
-        panel.add(new Label("版本"), 0, 0);
-        panel.add(launchVersionTitle, 1, 0);
-        panel.add(new Label("离线账户"), 0, 1);
-        panel.add(playerNameField, 1, 1);
-        panel.add(new Label("内存(MB)"), 0, 2);
-        panel.add(memorySpinner, 1, 2);
-        panel.add(new Label("Java"), 0, 3);
-        launchJavaLabel.setMinWidth(320);
-        panel.add(launchJavaLabel, 1, 3);
-        panel.add(launchBtn, 1, 4);
-
-        VBox right = new VBox(12,
-                card(title("启动游戏"), panel),
-                card(title("公告"),
-                        new Label("PCLGE2 Java 版 2.00"),
-                        new Label("原版游戏下载，Fabric / Quilt / Forge / NeoForge 安装，"),
-                        new Label("模组 / 资源包 / 整合包从 Modrinth 下载，皮肤与局域网联机。")));
-        VBox.setVgrow(right, Priority.ALWAYS);
-        return twoPane(sideBar("版本列表", launchVersionList, new HBox(6, changeDir, refresh)), right);
     }
